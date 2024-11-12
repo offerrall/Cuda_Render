@@ -119,12 +119,14 @@ void display_buffer(CudaRenderer* renderer, uchar4* cuda_buffer) {
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, -1.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f, -1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f,  1.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f,  1.0f);
+        // Invert y-axis in texture coordinates
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f); // Bottom-left
+        glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f, -1.0f); // Bottom-right
+        glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f,  1.0f); // Top-right
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f,  1.0f); // Top-left
     glEnd();
 }
+
 
 bool should_close(CudaRenderer* renderer) {
     return renderer ? renderer->should_quit : true;
