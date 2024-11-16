@@ -13,6 +13,7 @@ struct CudaRenderer {
     int width;
     int height;
     bool should_quit;
+    MouseInfo mouse_info;
 };
 
 extern "C" {
@@ -30,6 +31,7 @@ CudaRenderer* create_renderer(const char* title, int width, int height) {
     renderer->width = width;
     renderer->height = height;
     renderer->should_quit = false;
+    renderer->mouse_info = {};
 
     renderer->window = SDL_CreateWindow(title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -92,8 +94,27 @@ void begin_frame(CudaRenderer* renderer) {
         if (event.type == SDL_QUIT) {
             renderer->should_quit = true;
         }
+        else if (event.type == SDL_MOUSEMOTION) {
+            renderer->mouse_info.x = event.motion.x;
+            renderer->mouse_info.y = event.motion.y;
+        }
+        else if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP) {
+            bool pressed = (event.type == SDL_MOUSEBUTTONDOWN);
+            switch (event.button.button) {
+                case SDL_BUTTON_LEFT:
+                    renderer->mouse_info.left_button = pressed;
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    renderer->mouse_info.right_button = pressed;
+                    break;
+                case SDL_BUTTON_MIDDLE:
+                    renderer->mouse_info.middle_button = pressed;
+                    break;
+            }
+        }
     }
 }
+
 
 void end_frame(CudaRenderer* renderer) {
     if (!renderer) return;
@@ -136,6 +157,12 @@ void get_window_size(CudaRenderer* renderer, int* width, int* height) {
     if (renderer && width && height) {
         *width = renderer->width;
         *height = renderer->height;
+    }
+}
+
+void get_mouse_info(CudaRenderer* renderer, MouseInfo* info) {
+    if (renderer && info) {
+        *info = renderer->mouse_info;
     }
 }
 
