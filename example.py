@@ -1,23 +1,27 @@
+# cuda_composer is another module that is not included in this repository
+# It provides CUDA buffer creation and manipulation functions
 from cuda_composer import create_buffer, clear_color
-from cuda_render import create_renderer, destroy_renderer, display_buffer, begin_frame, end_frame, should_close
 
-# Crear ventana
-renderer = create_renderer("Test Window", 1920, 1080)
+from cuda_render import create_renderer, destroy_renderer, display_buffer, should_quit
 
-# Crear buffer CUDA
-buffer = create_buffer(1920, 1080)
+def main():
+    # Create window and CUDA buffer
+    width, height = 1920, 1080
+    renderer = create_renderer(width, height)
+    buffer = create_buffer(width, height) # CUDA buffer, RGBA format, uchar4
 
-try:
-    # Loop principal
-    while not should_close(renderer):
-        begin_frame(renderer)
-        
-        # Actualizar buffer (ejemplo: color azul)
-        clear_color(buffer, 1920, 1080, 0, 0, 255, 255)
-        
-        # Mostrar
-        display_buffer(renderer, buffer)
-        end_frame(renderer)
-finally:
-    # Limpieza
-    destroy_renderer(renderer)
+    try:
+        # Main render loop
+        while not should_quit(renderer):
+            # Update buffer (example: blue color)
+            clear_color(buffer, width, height, 0, 0, 255, 255)
+            
+            # Display the buffer
+            display_buffer(renderer, buffer)
+            
+    finally:
+        # Cleanup
+        destroy_renderer(renderer)
+
+if __name__ == "__main__":
+    main()
