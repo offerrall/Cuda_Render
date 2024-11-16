@@ -1,57 +1,53 @@
-import os
 import subprocess
+import os
 
 # Paths
-CUDA_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6"
-GLEW_PATH = "C:/C_LIBRERIAS/glew-2.1.0"
-SDL2_PATH = "C:/C_LIBRERIAS/SDL2-2.30.9"
-BUILD_DIR = "build"
+cuda_path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6"
+glew_path = "C:/C_LIBRERIAS/glew-2.1.0"
+sdl2_path = "C:/C_LIBRERIAS/SDL2-2.30.9"
 
-# Compiler and linker settings
-compiler = "nvcc"
-flags = [
-    "-std=c++11",  # C++11 standard
-    "-I", f"{GLEW_PATH}/include",
-    "-I", f"{SDL2_PATH}/include",
-    "-I", f"{CUDA_PATH}/include",
-    "--shared",  # Build a shared library (DLL)
-    "-Xcompiler", "/DLL",  # Inform the host compiler (MSVC) to build a DLL
-]
-linker_flags = [
-    "-L", f"{GLEW_PATH}/lib/Release/x64",
-    "-L", f"{SDL2_PATH}/lib/x64",
-    "-L", f"{CUDA_PATH}/lib/x64",
-    "-lglew32",
-    "-lSDL2",
-    "-lSDL2main",
-    "-lcuda",
-    "-lcudart",
-    "-lopengl32",
-]
+def build_cuda_dll():
+    if not os.path.exists(cuda_path):
+        print(f"El directorio de CUDA no existe: {cuda_path}")
+        print("Por favor, modifique la variable cuda_path en el script.")
+        return
+    
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    cuda_source = os.path.join(current_dir, "cuda_render.cpp")
+    output_dll = os.path.join(current_dir, "cuda_render.dll")
+    
+    nvcc_cmd = [
+        "nvcc",
+        "--shared",
+        "-Xcompiler", "/MD",
+        cuda_source,
+        "-o", output_dll,
+        "-I", f"{cuda_path}/include",
+        "-I", f"{glew_path}/include",
+        "-I", f"{sdl2_path}/include",
+        "-L", f"{cuda_path}/lib/x64",
+        "-L", f"{glew_path}/lib/Release/x64",
+        "-L", f"{sdl2_path}/lib/x64",
+        "-lcudart",
+        "-lglew32",
+        "-lSDL2",
+        "-lSDL2main",
+        "-lopengl32",
+    ]
+    
+    try:
+        print("Compilando DLL...")
+        subprocess.check_call(nvcc_cmd)
+        print(f"DLL creada exitosamente: {output_dll}")
+        
+        for ext in ['.exp', '.lib']:
+            temp_file = output_dll.replace('.dll', ext)
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+                
+    except subprocess.CalledProcessError as e:
+        print(f"Error durante la compilación: {e}")
+        raise
 
-# Create build directory if it doesn't exist
-if not os.path.exists(BUILD_DIR):
-    os.makedirs(BUILD_DIR)
-
-# Source files and output
-source_files = [
-    "cuda_render.cpp",
-]
-output_file = os.path.join(BUILD_DIR, "cuda_render.dll")
-
-# Compile command
-command = [
-    compiler,
-    *flags,
-    *source_files,
-    "-o", output_file,
-    *linker_flags,
-]
-
-# Execute the command
-try:
-    print("Compiling...")
-    subprocess.check_call(command)
-    print(f"Build successful: {output_file}")
-except subprocess.CalledProcessError as e:
-    print(f"Build failed with error: {e}")
+if __name__ == "__main__":
+    build_cuda_dll()

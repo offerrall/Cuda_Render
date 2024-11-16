@@ -11,13 +11,13 @@
     #define DLL_EXPORT
 #endif
 
-// Forward declarations para evitar incluir los headers completos en el .h
+// Forward declarations
 struct SDL_Window;
 typedef void* SDL_GLContext;
 typedef unsigned int GLuint;
 struct cudaGraphicsResource;
 
-// Estructura principal del renderer
+// Main renderer structure
 struct DLL_EXPORT CudaRenderer {
     SDL_Window* window;
     SDL_GLContext gl_context;
@@ -33,7 +33,7 @@ struct DLL_EXPORT CudaRenderer {
 extern "C" {
 #endif
 
-// Funciones exportadas
+// Exported functions
 DLL_EXPORT CudaRenderer* create_renderer(int width, int height);
 DLL_EXPORT void destroy_renderer(CudaRenderer* renderer);
 DLL_EXPORT void display_buffer(CudaRenderer* renderer, void* cuda_buffer);
