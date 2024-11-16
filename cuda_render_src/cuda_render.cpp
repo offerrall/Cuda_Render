@@ -123,7 +123,8 @@ void begin_lines(CudaRenderer* renderer) {
 }
 
 void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2, 
-               unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+               unsigned char r, unsigned char g, unsigned char b, unsigned char a,
+               float line_width = 1.0f) {
     if (!renderer) return;
     
     float gl_x1 = (x1 / renderer->width) * 2.0f - 1.0f;
@@ -131,6 +132,7 @@ void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2,
     float gl_x2 = (x2 / renderer->width) * 2.0f - 1.0f;
     float gl_y2 = ((renderer->height - y2) / renderer->height) * 2.0f - 1.0f;
     
+    glLineWidth(line_width);  // Solo añadimos esta línea
     renderer->line_vertices.push_back({gl_x1, gl_y1, r, g, b, a});
     renderer->line_vertices.push_back({gl_x2, gl_y2, r, g, b, a});
 }
