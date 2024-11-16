@@ -5,8 +5,8 @@
 struct CudaRenderer {
     SDL_Window* window;
     SDL_GLContext gl_context;
-    GLuint pbo;               // Para el intercambio CUDA-OpenGL
-    GLuint texture;           // Textura para mostrar
+    GLuint pbo;
+    GLuint texture;
     cudaGraphicsResource* cuda_pbo_resource;
     int width;
     int height;
@@ -23,21 +23,18 @@ CudaRenderer* create_renderer(int width, int height) {
     renderer->height = height;
     renderer->should_quit = false;
 
-    // Crear ventana con OpenGL
     renderer->window = SDL_CreateWindow("CUDA Render",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     
     renderer->gl_context = SDL_GL_CreateContext(renderer->window);
 
-    // Configurar PBO para CUDA
     glGenBuffers(1, &renderer->pbo);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, renderer->pbo);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, nullptr, GL_DYNAMIC_DRAW);
     cudaGraphicsGLRegisterBuffer(&renderer->cuda_pbo_resource, renderer->pbo, 
                                 cudaGraphicsMapFlagsWriteDiscard);
 
-    // Configurar textura
     glGenTextures(1, &renderer->texture);
     glBindTexture(GL_TEXTURE_2D, renderer->texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -60,27 +57,23 @@ void destroy_renderer(CudaRenderer* renderer) {
 void display_buffer(CudaRenderer* renderer, void* cuda_buffer) {
     if (!renderer || !cuda_buffer) return;
 
-    // Mapear PBO para CUDA
     void* pbo_buffer;
     size_t buffer_size;
     cudaGraphicsMapResources(1, &renderer->cuda_pbo_resource, 0);
     cudaGraphicsResourceGetMappedPointer(&pbo_buffer, &buffer_size, 
                                         renderer->cuda_pbo_resource);
     
-    // Copiar buffer CUDA al PBO
     cudaMemcpy(pbo_buffer, cuda_buffer, 
                renderer->width * renderer->height * 4, 
                cudaMemcpyDeviceToDevice);
     
     cudaGraphicsUnmapResources(1, &renderer->cuda_pbo_resource, 0);
 
-    // Renderizar el PBO como textura
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, renderer->pbo);
     glBindTexture(GL_TEXTURE_2D, renderer->texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, renderer->width, renderer->height,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    // Dibujar quad con la textura
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
