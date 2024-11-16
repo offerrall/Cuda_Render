@@ -36,8 +36,6 @@ ffi.cdef("""
     void begin_lines(CudaRenderer* renderer);
     void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2, 
                   unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-    void draw_rect(CudaRenderer* renderer, float x, float y, float width, float height,
-                  unsigned char r, unsigned char g, unsigned char b, unsigned char a);
     void end_lines(CudaRenderer* renderer);
 """)
 
@@ -91,13 +89,6 @@ def draw_line(renderer: RenderHandle, start_pos: Tuple[float, float],
     _lib.draw_line(renderer, 
                    start_pos[0], start_pos[1],
                    end_pos[0], end_pos[1],
-                   color[0], color[1], color[2], color[3])
-
-def draw_rect(renderer: RenderHandle, pos: Tuple[float, float], 
-              size: Tuple[float, float], color: Tuple[int, int, int, int]) -> None:
-    _lib.draw_rect(renderer,
-                   pos[0], pos[1],
-                   size[0], size[1],
                    color[0], color[1], color[2], color[3])
 
 def end_lines(renderer: RenderHandle) -> None:

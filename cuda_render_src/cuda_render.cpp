@@ -135,16 +135,6 @@ void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2,
     renderer->line_vertices.push_back({gl_x2, gl_y2, r, g, b, a});
 }
 
-void draw_rect(CudaRenderer* renderer, float x, float y, float width, float height,
-               unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
-    if (!renderer) return;
-    
-    draw_line(renderer, x, y, x + width, y, r, g, b, a);
-    draw_line(renderer, x + width, y, x + width, y + height, r, g, b, a);
-    draw_line(renderer, x + width, y + height, x, y + height, r, g, b, a);
-    draw_line(renderer, x, y + height, x, y, r, g, b, a);
-}
-
 void end_lines(CudaRenderer* renderer) {
     if (!renderer || renderer->line_vertices.empty()) return;
 
