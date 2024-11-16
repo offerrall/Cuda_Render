@@ -3,40 +3,24 @@ import os
 import platform
 import shutil
 
-# Configuración de rutas
 CUDA_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6"
 GLEW_PATH = "C:/C_LIBRERIAS/glew-2.1.0"
 SDL2_PATH = "C:/C_LIBRERIAS/SDL2-2.30.9"
 
 def build_cuda_dll():
-    # Verificar dependencias
-    if not os.path.exists(CUDA_PATH):
-        print(f"El directorio de CUDA no existe: {CUDA_PATH}")
-        return
-    if not os.path.exists(GLEW_PATH):
-        print(f"El directorio de GLEW no existe: {GLEW_PATH}")
-        return
-    if not os.path.exists(SDL2_PATH):
-        print(f"El directorio de SDL2 no existe: {SDL2_PATH}")
-        return
-
-    # Obtener directorio actual
     current_dir = os.path.dirname(os.path.abspath(__file__))
     cuda_source = os.path.join(current_dir, "cuda_render.cpp")
     output_dll = "cuda_render.dll"
 
-    # Verificar archivo fuente
-    if not os.path.exists(cuda_source):
-        print(f"No se encuentra el archivo fuente: {cuda_source}")
-        return
-
-    # Comando de compilación
     nvcc_cmd = [
         "nvcc",
         "-O3",
         "--shared",
         "-Xcompiler", "/MD",
-        "-Xlinker", "/NODEFAULTLIB:libcmt.lib",  # Opción de linker corregida
+        "-Xcompiler", "/LD",  # Importante: para crear una DLL
+        "-Xcompiler", "/DEF",  # Genera archivo .def
+        "-Xlinker", "/NODEFAULTLIB:libcmt.lib",
+        "-Xlinker", "/DLL",  # Explícitamente marca como DLL
         cuda_source,
         "-o", output_dll,
         # CUDA
@@ -55,29 +39,27 @@ def build_cuda_dll():
         f"{SDL2_PATH}/lib/x64/SDL2.lib",
         # Opciones adicionales
         "-Xcompiler", "/DWIN32",
-        "-Xcompiler", "/D_WINDOWS"
+        "-Xcompiler", "/D_WINDOWS",
+        "-Xcompiler", "/DBUILDING_DLL"  # Define que estamos construyendo una DLL
     ]
 
     try:
-        print(f"Compilando desde: {cuda_source}")
-        print(f"Salida a: {output_dll}")
         subprocess.check_call(nvcc_cmd)
-        print(f"DLL creada exitosamente: {output_dll}")
+        print(f"DLL created successfully: {output_dll}")
 
-        # Copiar SDL2.dll
+        # Copiar DLLs necesarias
         sdl_dll = os.path.join(SDL2_PATH, "lib/x64/SDL2.dll")
-        if os.path.exists(sdl_dll):
-            shutil.copy2(sdl_dll, current_dir)
-            print(f"Copiado {sdl_dll} al directorio actual")
-
-        # Limpiar archivos temporales
-        for ext in ['.exp', '.lib']:
-            temp_file = output_dll.replace('.dll', ext)
-            if os.path.exists(temp_file):
-                os.remove(temp_file)
+        package_dir = os.path.join(os.path.dirname(current_dir), "cuda_render")
+        
+        for dll in [output_dll, "SDL2.dll"]:
+            src = os.path.join(current_dir, dll)
+            dst = os.path.join(package_dir, dll)
+            if os.path.exists(src):
+                shutil.copy2(src, dst)
+                print(f"Copied {dll} to package directory")
 
     except subprocess.CalledProcessError as e:
-        print(f"Error durante la compilación: {e}")
+        print(f"Compilation error: {e}")
         raise
 
 def setup_vs_environment():

@@ -15,11 +15,12 @@ struct CudaRenderer;
     #define DLLEXPORT
 #endif
 
+#define CUDAAPI __stdcall  // Añadimos la convención de llamada
 
-DLLEXPORT CudaRenderer* create_renderer(int width, int height);
-DLLEXPORT void destroy_renderer(CudaRenderer* renderer);
-DLLEXPORT void display_buffer(CudaRenderer* renderer, void* cuda_buffer);
-DLLEXPORT bool should_quit(CudaRenderer* renderer);
+DLLEXPORT CudaRenderer* CUDAAPI create_renderer(int width, int height);
+DLLEXPORT void CUDAAPI destroy_renderer(CudaRenderer* renderer);
+DLLEXPORT void CUDAAPI display_buffer(CudaRenderer* renderer, void* cuda_buffer);
+DLLEXPORT bool CUDAAPI should_quit(CudaRenderer* renderer);
 
 #ifdef __cplusplus
 }
