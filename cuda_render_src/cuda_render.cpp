@@ -1,7 +1,10 @@
+#define BUILDING_DLL
+#include "cuda_render.h"
 #include <SDL.h>
 #include <GL/glew.h>
 #include <cuda_gl_interop.h>
 
+// Estructura interna del renderer
 struct CudaRenderer {
     SDL_Window* window;
     SDL_GLContext gl_context;

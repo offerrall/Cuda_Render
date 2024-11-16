@@ -11,29 +11,13 @@
     #define DLL_EXPORT
 #endif
 
-// Forward declarations
-struct SDL_Window;
-typedef void* SDL_GLContext;
-typedef unsigned int GLuint;
-struct cudaGraphicsResource;
-
-// Main renderer structure
-struct DLL_EXPORT CudaRenderer {
-    SDL_Window* window;
-    SDL_GLContext gl_context;
-    GLuint pbo;               
-    GLuint texture;           
-    cudaGraphicsResource* cuda_pbo_resource;
-    int width;
-    int height;
-    bool should_quit;
-};
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Exported functions
+// Declaraciones de funciones exportadas
+struct CudaRenderer;
+
 DLL_EXPORT CudaRenderer* create_renderer(int width, int height);
 DLL_EXPORT void destroy_renderer(CudaRenderer* renderer);
 DLL_EXPORT void display_buffer(CudaRenderer* renderer, void* cuda_buffer);

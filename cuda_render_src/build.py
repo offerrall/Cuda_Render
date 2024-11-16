@@ -1,15 +1,15 @@
 import subprocess
 import os
 
-# Paths
-cuda_path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6"
-glew_path = "C:/C_LIBRERIAS/glew-2.1.0"
-sdl2_path = "C:/C_LIBRERIAS/SDL2-2.30.9"
+
+CUDA_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6"
+GLEW_PATH = "C:/C_LIBRERIAS/glew-2.1.0"
+SDL2_PATH = "C:/C_LIBRERIAS/SDL2-2.30.9"
 
 def build_cuda_dll():
-    if not os.path.exists(cuda_path):
-        print(f"El directorio de CUDA no existe: {cuda_path}")
-        print("Por favor, modifique la variable cuda_path en el script.")
+    if not os.path.exists(CUDA_PATH):
+        print(f"El directorio de CUDA no existe: {CUDA_PATH}")
+        print("Por favor, modifique la variable CUDA_PATH en el script.")
         return
     
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,17 +22,18 @@ def build_cuda_dll():
         "-Xcompiler", "/MD",
         cuda_source,
         "-o", output_dll,
-        "-I", f"{cuda_path}/include",
-        "-I", f"{glew_path}/include",
-        "-I", f"{sdl2_path}/include",
-        "-L", f"{cuda_path}/lib/x64",
-        "-L", f"{glew_path}/lib/Release/x64",
-        "-L", f"{sdl2_path}/lib/x64",
+        "-I", f"{CUDA_PATH}/include",
+        "-I", f"{GLEW_PATH}/include",
+        "-I", f"{SDL2_PATH}/include",
+        "-L", f"{CUDA_PATH}/lib/x64",
+        "-L", f"{GLEW_PATH}/lib/Release/x64",
+        "-L", f"{SDL2_PATH}/lib/x64",
         "-lcudart",
         "-lglew32",
         "-lSDL2",
         "-lSDL2main",
         "-lopengl32",
+        "-DBUILDING_DLL"
     ]
     
     try:
