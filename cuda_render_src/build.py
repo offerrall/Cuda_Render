@@ -110,4 +110,3 @@ if __name__ == "__main__":
     setup_vs_environment()
     build_cuda_dll()
     os.remove("./cuda_render_src/SDL2.dll")
-    os.removedirs("./build")
