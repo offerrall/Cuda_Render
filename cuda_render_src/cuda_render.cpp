@@ -116,6 +116,7 @@ void begin_frame(CudaRenderer* renderer) {
             }
         }
     }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void begin_lines(CudaRenderer* renderer) {
