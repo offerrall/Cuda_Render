@@ -1,6 +1,9 @@
 from cuda_composer import create_buffer, clear_color
 from cuda_render import create_renderer, destroy_renderer, display_buffer, begin_frame, end_frame, should_close
 
+
+
+ventana = 1920, 1080
 # Crear ventana
 renderer = create_renderer("Test Window", 1920, 1080)
 
