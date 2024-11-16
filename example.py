@@ -10,40 +10,31 @@ from cuda_render import (
 )
 
 ventana = 1280, 720
-# Crear ventana
+
 renderer = create_renderer("Test Window", ventana[0], ventana[1])
 
-# Crear buffer CUDA
+
 buffer = create_buffer(ventana[0], ventana[1])
 
 try:
-    # Loop principal
+
     while not should_close(renderer):
         begin_frame(renderer)
         
-        # Obtener información del mouse
         mouse_x, mouse_y, left_click, right_click, middle_click = get_mouse_info(renderer)
         
-        # Ejemplo: cambiar colores según los clicks
         if left_click:
-            # Rojo cuando se hace click izquierdo
             clear_color(buffer, ventana[0], ventana[1], 255, 0, 0, 255)
         elif right_click:
-            # Verde cuando se hace click derecho
             clear_color(buffer, ventana[0], ventana[1], 0, 255, 0, 255)
         elif middle_click:
-            # Amarillo cuando se hace click con la rueda
             clear_color(buffer, ventana[0], ventana[1], 255, 255, 0, 255)
         else:
-            # Color base (azul) cuando no hay clicks
             clear_color(buffer, ventana[0], ventana[1], 0, 0, 255, 255)
             
-        # Imprimir información del mouse para debug
         print(f"Mouse pos: ({mouse_x}, {mouse_y}) - Left: {left_click}, Right: {right_click}, Middle: {middle_click}")
         
-        # Mostrar
         display_buffer(renderer, buffer)
         end_frame(renderer)
 finally:
-    # Limpieza
     destroy_renderer(renderer)

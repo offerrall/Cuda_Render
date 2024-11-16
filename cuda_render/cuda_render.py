@@ -6,10 +6,9 @@ ffi = FFI()
 
 
 ffi.cdef("""
-    // Tipos compartidos con cuda_composer
+
     typedef struct { unsigned char x, y, z, w; } uchar4;
     
-    // Estructura para información del mouse
     typedef struct {
         int x;
         int y;
@@ -18,16 +17,13 @@ ffi.cdef("""
         bool middle_button;
     } MouseInfo;
     
-    // Estructura para vértices de línea
     typedef struct {
         float x, y;
         unsigned char r, g, b, a;
     } LineVertex;
     
-    // Tipos específicos de cuda_render
     typedef struct CudaRenderer CudaRenderer;
     
-    // Funciones de cuda_render
     CudaRenderer* create_renderer(const char* title, int width, int height);
     void destroy_renderer(CudaRenderer* renderer);
     void begin_frame(CudaRenderer* renderer);
@@ -37,7 +33,6 @@ ffi.cdef("""
     void get_window_size(CudaRenderer* renderer, int* width, int* height);
     void get_mouse_info(CudaRenderer* renderer, MouseInfo* info);
     
-    // Funciones de dibujo
     void begin_lines(CudaRenderer* renderer);
     void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2, 
                   unsigned char r, unsigned char g, unsigned char b, unsigned char a);
@@ -89,20 +84,10 @@ def get_mouse_info(renderer: RenderHandle) -> Tuple[int, int, bool, bool, bool]:
             bool(info.middle_button))
 
 def begin_lines(renderer: RenderHandle) -> None:
-    """Comienza una nueva secuencia de dibujo de líneas."""
     _lib.begin_lines(renderer)
 
 def draw_line(renderer: RenderHandle, start_pos: Tuple[float, float], 
               end_pos: Tuple[float, float], color: Tuple[int, int, int, int]) -> None:
-    """
-    Dibuja una línea entre dos puntos.
-    
-    Args:
-        renderer: Handle del renderizador
-        start_pos: Tupla (x, y) del punto inicial
-        end_pos: Tupla (x, y) del punto final
-        color: Tupla (r, g, b, a) del color
-    """
     _lib.draw_line(renderer, 
                    start_pos[0], start_pos[1],
                    end_pos[0], end_pos[1],
@@ -110,20 +95,10 @@ def draw_line(renderer: RenderHandle, start_pos: Tuple[float, float],
 
 def draw_rect(renderer: RenderHandle, pos: Tuple[float, float], 
               size: Tuple[float, float], color: Tuple[int, int, int, int]) -> None:
-    """
-    Dibuja un rectángulo.
-    
-    Args:
-        renderer: Handle del renderizador
-        pos: Tupla (x, y) de la esquina superior izquierda
-        size: Tupla (width, height) del tamaño
-        color: Tupla (r, g, b, a) del color
-    """
     _lib.draw_rect(renderer,
                    pos[0], pos[1],
                    size[0], size[1],
                    color[0], color[1], color[2], color[3])
 
 def end_lines(renderer: RenderHandle) -> None:
-    """Finaliza y renderiza la secuencia actual de líneas."""
     _lib.end_lines(renderer)
