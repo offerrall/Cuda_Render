@@ -15,6 +15,7 @@ struct CudaRenderer {
     bool should_quit;
     MouseInfo mouse_info;
     std::vector<LineVertex> line_vertices;
+    std::vector<LineVertex> rectangle_vertices;
 };
 
 extern "C" {
@@ -150,6 +151,49 @@ void end_lines(CudaRenderer* renderer) {
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(LineVertex), &renderer->line_vertices[0].r);
     glDrawArrays(GL_LINES, 0, renderer->line_vertices.size());
     glLineWidth(1.0f);
+    
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_BLEND);
+}
+
+void begin_rectangles(CudaRenderer* renderer) {
+    if (!renderer) return;
+    renderer->rectangle_vertices.clear();
+}
+
+void draw_rectangle(CudaRenderer* renderer, float x, float y, float width, float height,
+                   unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+    if (!renderer) return;
+    
+    float gl_x = (x / renderer->width) * 2.0f - 1.0f;
+    float gl_y = ((renderer->height - y) / renderer->height) * 2.0f - 1.0f;
+    float gl_w = (width / renderer->width) * 2.0f;
+    float gl_h = (-height / renderer->height) * 2.0f;
+    
+    renderer->rectangle_vertices.push_back({gl_x, gl_y, r, g, b, a});
+    renderer->rectangle_vertices.push_back({gl_x + gl_w, gl_y, r, g, b, a});
+    renderer->rectangle_vertices.push_back({gl_x, gl_y + gl_h, r, g, b, a});
+    
+    renderer->rectangle_vertices.push_back({gl_x + gl_w, gl_y, r, g, b, a});
+    renderer->rectangle_vertices.push_back({gl_x + gl_w, gl_y + gl_h, r, g, b, a});
+    renderer->rectangle_vertices.push_back({gl_x, gl_y + gl_h, r, g, b, a});
+}
+
+void end_rectangles(CudaRenderer* renderer) {
+    if (!renderer || renderer->rectangle_vertices.empty()) return;
+
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    
+    glVertexPointer(2, GL_FLOAT, sizeof(LineVertex), &renderer->rectangle_vertices[0].x);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(LineVertex), &renderer->rectangle_vertices[0].r);
+    
+    glDrawArrays(GL_TRIANGLES, 0, renderer->rectangle_vertices.size());
     
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);

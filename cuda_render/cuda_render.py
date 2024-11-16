@@ -37,6 +37,12 @@ ffi.cdef("""
     void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2, 
                   unsigned char r, unsigned char g, unsigned char b, unsigned char a);
     void end_lines(CudaRenderer* renderer);
+
+    void begin_rectangles(CudaRenderer* renderer);
+    void draw_rectangle(CudaRenderer* renderer, float x, float y, float width, float height,
+                       unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+    void end_rectangles(CudaRenderer* renderer);
+
 """)
 
 
@@ -93,3 +99,16 @@ def draw_line(renderer: RenderHandle, start_pos: Tuple[float, float],
 
 def end_lines(renderer: RenderHandle) -> None:
     _lib.end_lines(renderer)
+
+def begin_rectangles(renderer: RenderHandle) -> None:
+    _lib.begin_rectangles(renderer)
+
+def draw_rectangle(renderer: RenderHandle, pos: Tuple[float, float],
+                  size: Tuple[float, float], color: Tuple[int, int, int, int]) -> None:
+    _lib.draw_rectangle(renderer,
+                       pos[0], pos[1],
+                       size[0], size[1],
+                       color[0], color[1], color[2], color[3])
+
+def end_rectangles(renderer: RenderHandle) -> None:
+    _lib.end_rectangles(renderer)
