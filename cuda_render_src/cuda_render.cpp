@@ -1,8 +1,8 @@
-
 #include "cuda_render.h"
 #include <SDL.h>
 #include <cuda_gl_interop.h>
 #include <stdio.h>
+#include <vector>
 
 struct CudaRenderer {
     SDL_Window* window;
@@ -14,6 +14,7 @@ struct CudaRenderer {
     int height;
     bool should_quit;
     MouseInfo mouse_info;
+    std::vector<LineVertex> line_vertices;
 };
 
 extern "C" {
@@ -32,6 +33,7 @@ CudaRenderer* create_renderer(const char* title, int width, int height) {
     renderer->height = height;
     renderer->should_quit = false;
     renderer->mouse_info = {};
+    renderer->line_vertices.reserve(1000);
 
     renderer->window = SDL_CreateWindow(title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -115,6 +117,53 @@ void begin_frame(CudaRenderer* renderer) {
     }
 }
 
+void begin_lines(CudaRenderer* renderer) {
+    if (!renderer) return;
+    renderer->line_vertices.clear();
+}
+
+void draw_line(CudaRenderer* renderer, float x1, float y1, float x2, float y2, 
+               unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+    if (!renderer) return;
+    
+    float gl_x1 = (x1 / renderer->width) * 2.0f - 1.0f;
+    float gl_y1 = ((renderer->height - y1) / renderer->height) * 2.0f - 1.0f;
+    float gl_x2 = (x2 / renderer->width) * 2.0f - 1.0f;
+    float gl_y2 = ((renderer->height - y2) / renderer->height) * 2.0f - 1.0f;
+    
+    renderer->line_vertices.push_back({gl_x1, gl_y1, r, g, b, a});
+    renderer->line_vertices.push_back({gl_x2, gl_y2, r, g, b, a});
+}
+
+void draw_rect(CudaRenderer* renderer, float x, float y, float width, float height,
+               unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+    if (!renderer) return;
+    
+    draw_line(renderer, x, y, x + width, y, r, g, b, a);
+    draw_line(renderer, x + width, y, x + width, y + height, r, g, b, a);
+    draw_line(renderer, x + width, y + height, x, y + height, r, g, b, a);
+    draw_line(renderer, x, y + height, x, y, r, g, b, a);
+}
+
+void end_lines(CudaRenderer* renderer) {
+    if (!renderer || renderer->line_vertices.empty()) return;
+
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    
+    glVertexPointer(2, GL_FLOAT, sizeof(LineVertex), &renderer->line_vertices[0].x);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(LineVertex), &renderer->line_vertices[0].r);
+    
+    glDrawArrays(GL_LINES, 0, renderer->line_vertices.size());
+    
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_BLEND);
+}
 
 void end_frame(CudaRenderer* renderer) {
     if (!renderer) return;
@@ -140,14 +189,14 @@ void display_buffer(CudaRenderer* renderer, uchar4* cuda_buffer) {
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
-        // Invert y-axis in texture coordinates
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f); // Bottom-left
-        glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f, -1.0f); // Bottom-right
-        glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f,  1.0f); // Top-right
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f,  1.0f); // Top-left
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f, -1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f,  1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f,  1.0f);
     glEnd();
+    
+    end_lines(renderer);
 }
-
 
 bool should_close(CudaRenderer* renderer) {
     return renderer ? renderer->should_quit : true;
