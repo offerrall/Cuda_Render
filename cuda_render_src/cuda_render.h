@@ -9,13 +9,17 @@ extern "C" {
 
 struct CudaRenderer;
 
-__declspec(dllexport) CudaRenderer* create_renderer(const char* title, int width, int height);
-__declspec(dllexport) void destroy_renderer(CudaRenderer* renderer);
-__declspec(dllexport) void begin_frame(CudaRenderer* renderer);
-__declspec(dllexport) void end_frame(CudaRenderer* renderer);
-__declspec(dllexport) void display_buffer(CudaRenderer* renderer, uchar4* cuda_buffer);
-__declspec(dllexport) bool should_close(CudaRenderer* renderer);
-__declspec(dllexport) void get_window_size(CudaRenderer* renderer, int* width, int* height);
+#ifdef _WIN32
+    #define DLLEXPORT __declspec(dllexport)
+#else
+    #define DLLEXPORT
+#endif
+
+
+DLLEXPORT CudaRenderer* create_renderer(int width, int height);
+DLLEXPORT void destroy_renderer(CudaRenderer* renderer);
+DLLEXPORT void display_buffer(CudaRenderer* renderer, void* cuda_buffer);
+DLLEXPORT bool should_quit(CudaRenderer* renderer);
 
 #ifdef __cplusplus
 }

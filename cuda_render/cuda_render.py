@@ -1,64 +1,40 @@
 from cffi import FFI
-from typing import TypeAlias, Tuple, Optional, Any
-
+from typing import TypeAlias, Optional, Any
 
 ffi = FFI()
 
-
+# Definición C minimalista
 ffi.cdef("""
-    // Tipos compartidos con cuda_composer
+    // Tipos
     typedef struct { unsigned char x, y, z, w; } uchar4;
-    
-    // Tipos específicos de cuda_render
     typedef struct CudaRenderer CudaRenderer;
     
-    // Funciones de cuda_render
-    CudaRenderer* create_renderer(const char* title, int width, int height);
+    // API
+    CudaRenderer* create_renderer(int width, int height);
     void destroy_renderer(CudaRenderer* renderer);
-    void begin_frame(CudaRenderer* renderer);
-    void end_frame(CudaRenderer* renderer);
-    void display_buffer(CudaRenderer* renderer, uchar4* cuda_buffer);
-    bool should_close(CudaRenderer* renderer);
-    void get_window_size(CudaRenderer* renderer, int* width, int* height);
+    void display_buffer(CudaRenderer* renderer, void* cuda_buffer);
+    bool should_quit(CudaRenderer* renderer);
 """)
 
-
+# Cargar la biblioteca
 _lib = ffi.dlopen("cuda_render.dll")
 
+# Tipo para el handle del renderer
 RenderHandle: TypeAlias = Any
 
-def create_renderer(title: str, width: int, height: int) -> Optional[RenderHandle]:
-
-    return _lib.create_renderer(
-        ffi.new("char[]", title.encode('utf-8')),
-        width,
-        height
-    )
+def create_renderer(width: int, height: int) -> Optional[RenderHandle]:
+    """Crear un nuevo renderer CUDA."""
+    return _lib.create_renderer(width, height)
 
 def destroy_renderer(renderer: RenderHandle) -> None:
-
+    """Liberar recursos del renderer."""
     _lib.destroy_renderer(renderer)
 
-def begin_frame(renderer: RenderHandle) -> None:
-
-    _lib.begin_frame(renderer)
-
-def end_frame(renderer: RenderHandle) -> None:
-
-    _lib.end_frame(renderer)
-
 def display_buffer(renderer: RenderHandle, cuda_buffer: Any) -> None:
+    """Mostrar un buffer CUDA en la ventana."""
+    buffer_ptr = ffi.cast("void*", cuda_buffer)
+    _lib.display_buffer(renderer, buffer_ptr)
 
-    cuda_buffer_ptr = ffi.cast("uchar4*", cuda_buffer)
-    _lib.display_buffer(renderer, cuda_buffer_ptr)
-
-def should_close(renderer: RenderHandle) -> bool:
-
-    return bool(_lib.should_close(renderer))
-
-def get_window_size(renderer: RenderHandle) -> Tuple[int, int]:
-
-    width = ffi.new("int*")
-    height = ffi.new("int*")
-    _lib.get_window_size(renderer, width, height)
-    return width[0], height[0]
+def should_quit(renderer: RenderHandle) -> bool:
+    """Comprobar si se debe cerrar la ventana."""
+    return bool(_lib.should_quit(renderer))
