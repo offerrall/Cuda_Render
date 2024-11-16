@@ -85,13 +85,11 @@ def begin_lines(renderer: RenderHandle) -> None:
     _lib.begin_lines(renderer)
 
 def draw_line(renderer: RenderHandle, start_pos: Tuple[float, float], 
-              end_pos: Tuple[float, float], color: Tuple[int, int, int, int],
-              width: float = 1.0) -> None:
+              end_pos: Tuple[float, float], color: Tuple[int, int, int, int]) -> None:
     _lib.draw_line(renderer, 
                    start_pos[0], start_pos[1],
                    end_pos[0], end_pos[1],
-                   color[0], color[1], color[2], color[3],
-                   width)
+                   color[0], color[1], color[2], color[3])
 
 def end_lines(renderer: RenderHandle) -> None:
     _lib.end_lines(renderer)
