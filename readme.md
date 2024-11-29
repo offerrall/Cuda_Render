@@ -12,6 +12,8 @@ Simple CUDA buffer renderer using OpenGL for display.
 ## Installation
 
 1. Build the C++ library:
+Modify the build script build.py in cuda_render_src to match your system configuration.
+Then run the following commands:
 ```bash
 cd cuda_render_src
 ./compile_lib.bat  # or compile using your preferred method
