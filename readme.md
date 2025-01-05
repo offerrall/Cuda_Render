@@ -43,10 +43,5 @@ while not cuda_render.should_quit(renderer):
 cuda_render.destroy_renderer(renderer)
 ```
 
-## Development
-- Source code for the C++ library is in `cuda_render_src/`
-- Python wrapper is in `cuda_render/`
-- See `example.py` for a complete usage example
-
 ## License
 MIT
